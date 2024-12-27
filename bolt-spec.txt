@@ -1,0 +1,208 @@
+# Especificación para BOLT - VoIP Testing Tool v1.0
+
+## Estructura del Proyecto
+
+### 1. Tecnologías Base
+- Frontend: Electron 25+
+- Backend: .NET 7.0+
+- Bridge: Edge.js para comunicación Electron-C#
+- Base de datos: SQLite para almacenamiento local
+
+### 2. Estructura de Carpetas
+```
+VoIPTestingTool/
+├── electron-app/          # Frontend Electron
+│   ├── src/
+│   │   ├── main/         # Proceso principal
+│   │   ├── renderer/     # Proceso de renderizado
+│   │   └── styles/       # CSS y estilos
+├── backend/              # Backend .NET
+│   ├── NetworkManager/   # Módulo 1
+│   ├── SIPHandler/      # Módulo 2
+│   ├── CallController/  # Módulo 3
+│   └── MonitorService/  # Módulo 4
+└── bridge/              # Código de integración
+```
+
+## Especificaciones por Módulo
+
+### Módulo 1: Configuración de Red
+#### Frontend (Electron)
+```javascript
+- Componentes requeridos:
+  - NetworkConfigView
+    - IPAddressInput (local/remoto)
+    - PortSelector (default: 5060)
+    - ProtocolToggle (TCP/UDP)
+    - StatusIndicator
+```
+#### Backend (C#)
+```csharp
+- Clases principales:
+  - NetworkManager
+    - GetLocalIPs()
+    - ConfigureEndpoint(ip, port, protocol)
+    - ValidateConnection()
+```
+
+### Módulo 2: Monitorización OPTIONS
+#### Frontend (Electron)
+```javascript
+- Componentes requeridos:
+  - OptionsMonitorView
+    - StartStopButton
+    - IntervalControl
+    - CountersDisplay
+    - RealTimeLog
+```
+#### Backend (C#)
+```csharp
+- Clases principales:
+  - SIPOptionsManager
+    - SendOptions()
+    - HandleOptionsResponse()
+    - MonitorOptions()
+  - MetricsCollector
+    - TrackLatency()
+    - CountPackets()
+```
+
+### Módulo 3: Control de Llamadas
+#### Frontend (Electron)
+```javascript
+- Componentes requeridos:
+  - CallControlView
+    - OutgoingCallPanel
+    - IncomingCallPanel
+    - CallSetupForm
+    - ResponseTypeSelector
+```
+#### Backend (C#)
+```csharp
+- Clases principales:
+  - CallManager
+    - InitiateCall()
+    - HandleIncomingCall()
+    - EndCall()
+  - SIPMessageBuilder
+    - CreateInvite()
+    - CreateResponse()
+```
+
+### Módulo 4: Call Monitor
+#### Frontend (Electron)
+```javascript
+- Componentes requeridos:
+  - CallMonitorView
+    - ActiveCallsList
+    - CallStatsDisplay
+    - RealTimeGraph
+    - DetailedCallView
+```
+#### Backend (C#)
+```csharp
+- Clases principales:
+  - CallMonitor
+    - TrackActiveCalls()
+    - CollectStatistics()
+    - GenerateReport()
+```
+
+## Especificaciones de Interfaz
+
+### Estilo Visual
+```css
+- Tema: Retro-terminal
+- Colores principales:
+  - Fondo: #000000
+  - Texto: #00FF00
+  - Acentos: #008800
+- Fuente: 'Courier New' o similar monospace
+```
+
+### Layouts
+```
+- Ventana principal:
+  - Header (20% altura)
+  - Panel principal (60% altura)
+  - Panel de estado (20% altura)
+- Paneles modulares:
+  - Diseño grid 2x2 para módulos
+  - Paneles redimensionables
+```
+
+## Integración Edge.js
+
+### Métodos Bridge
+```javascript
+- networkBridge
+  - configureNetwork()
+  - getNetworkStatus()
+- sipBridge
+  - startOptionsMonitoring()
+  - handleSIPMessages()
+- callBridge
+  - initiateCall()
+  - handleCallEvents()
+- monitorBridge
+  - getCallStats()
+  - subscribeToUpdates()
+```
+
+## Requisitos de Desarrollo
+
+### Librerías Principales
+```
+Frontend:
+- electron: ^25.0.0
+- chart.js: ^4.0.0
+- vue: ^3.0.0 (opcional para componentes)
+
+Backend:
+- SIPSorcery: ^6.0.0
+- System.Net.Sockets
+- Newtonsoft.Json
+```
+
+### Paquetes NPM Requeridos
+```json
+{
+  "dependencies": {
+    "electron": "^25.0.0",
+    "edge-js": "^19.0.0",
+    "chart.js": "^4.0.0",
+    "socket.io": "^4.0.0"
+  }
+}
+```
+
+### NuGet Packages Requeridos
+```xml
+<PackageReference Include="SIPSorcery" Version="6.0.0" />
+<PackageReference Include="Newtonsoft.Json" Version="13.0.0" />
+<PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
+```
+
+## Notas de Implementación
+
+### Prioridades de Desarrollo
+1. Configuración de red básica
+2. Monitorización OPTIONS
+3. Control de llamadas básico
+4. Sistema de monitoreo
+
+### Consideraciones Técnicas
+- Implementar manejo de errores robusto
+- Usar async/await para operaciones de red
+- Implementar retry patterns para operaciones críticas
+- Mantener logs detallados
+- Usar patrón Observer para actualizaciones en tiempo real
+
+### Flujo de Datos
+```
+[Electron UI] ←→ [Edge.js Bridge] ←→ [.NET Backend]
+     ↓               ↓                    ↓
+[Vue States]    [Event Handlers]    [Service Layer]
+     ↓               ↓                    ↓
+[UI Updates]    [Data Transform]    [Business Logic]
+```
